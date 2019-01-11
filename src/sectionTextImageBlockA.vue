@@ -9,8 +9,12 @@
         <div class="container section-padding">
             <div class="row">
                 <div class="titles">
-                    <h1 class="section-title"><wwObject v-bind:ww-object="section.data.title"></wwObject></h1>
-                    <h2 class="section-subtitle"><wwObject v-bind:ww-object="section.data.subtitle"></wwObject></h2>
+                    <h1 class="section-title">
+                        <wwObject v-bind:ww-object="section.data.title"></wwObject>
+                    </h1>
+                    <h2 class="section-subtitle">
+                        <wwObject v-bind:ww-object="section.data.subtitle"></wwObject>
+                    </h2>
                 </div>
             </div>
 
@@ -26,14 +30,14 @@
                     </div>
             
                     <!-- wwManager:start -->
-                    <div class="edit-button-top-left" @click="removeBlock(index)">
+                    <div v-show="editMode" class="edit-button-top-left" @click="removeBlock(index)">
                         <i class="wwi wwi-delete" aria-hidden="true"></i>
                     </div>
                     <!-- wwManager:end -->
                 </div>
 
                 <!-- wwManager:start -->
-                <div class="blocks add-block" :class="{'left': section.data.blocks && !(section.data.blocks.length % 2)}">
+                <div v-show="editMode" class="blocks add-block" :class="{'left': section.data.blocks && !(section.data.blocks.length % 2)}">
                     <div class="plus" @click="addBlock()">
                         <i class="wwi wwi-add" aria-hidden="true"></i>
                     </div>
@@ -57,6 +61,9 @@ export default {
     computed: {
         section() {
             return this.sectionCtrl.get();
+        },
+        editMode() {
+            return this.sectionCtrl.getEditMode() == 'CONTENT'
         }
     },
     created() {
@@ -64,31 +71,31 @@ export default {
     },
     methods: {
         getNewBlock() {
-            const data = {}
+            const data = {
+                img: wwLib.wwObject.getDefault({ type: 'ww-image' }),
+                text: wwLib.wwObject.getDefault({ type: 'ww-text' }),
+                text2: wwLib.wwObject.getDefault({ type: 'ww-text' }),
+                title: wwLib.wwObject.getDefault({ type: 'ww-text' }),
+                button: wwLib.wwObject.getDefault({ type: 'ww-button', data: { color: 'black', borderColor: 'black' } })
+            }
 
-            data.img = wwLib.wwObject.getDefault({ type: 'ww-image' });
-            data.text = wwLib.wwObject.getDefault({ type: 'ww-text', data: { text: 'Start editing by hitting the pen!' } });
-            data.text2 = wwLib.wwObject.getDefault({ type: 'ww-text' });
-            data.title = wwLib.wwObject.getDefault({ type: 'ww-text', data: { text: 'Use it to illustrate your story, products or services...' } });
-            data.button = wwLib.wwObject.getDefault({ type: 'ww-button', data: { color: 'black', borderColor: 'black' } });
-    
             return data;
         },
         initData() {
             this.section.data = this.section.data || {};
-    
-            if (_.isEmpty(this.section.data.blocks))
+        
+            if (_.isEmpty(this.section.data.blocks)) {
                 this.section.data.blocks = [this.getNewBlock(), this.getNewBlock()];
-            
-            if (!this.section.data.background)
+            }
+            if (!this.section.data.background) {
                 this.section.data.background = wwLib.wwObject.getDefault({ type: 'ww-color' });
-
-            if (!this.section.data.title)
+            }
+            if (!this.section.data.title) {
                 this.section.data.title = wwLib.wwObject.getDefault({ type: 'ww-text' });
-            
-            if (!this.section.data.subtitle)
+            }
+            if (!this.section.data.subtitle) {
                 this.section.data.subtitle = wwLib.wwObject.getDefault({ type: 'ww-text' });
-
+            }
             this.sectionCtrl.update(this.section);
         },
         addBlock(options) {
